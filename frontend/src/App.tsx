@@ -3,6 +3,7 @@ import { Download, FileSpreadsheet, Loader2, Play, Sparkles, Upload } from "luci
 import { createRoot } from "react-dom/client";
 import "./styles.css";
 
+const API_BASE = import.meta.env.VITE_API_URL;
 type Row = Record<string, string>;
 
 type ParsedFile = {
@@ -21,11 +22,11 @@ const api = {
   async parseFile(file: File): Promise<ParsedFile> {
     const form = new FormData();
     form.append("file", file);
-    const response = await fetch("/api/parse-file/", { method: "POST", body: form });
+    const response = await fetch(`${API_BASE}/api/parse-file/`, { method: "POST", body: form });
     return readJson(response);
   },
   async suggestRegex(description: string, column: string) {
-    const response = await fetch("/api/suggest-regex/", {
+    const response = await fetch(`${API_BASE}/api/suggest-regex/`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ description, column })
@@ -33,7 +34,7 @@ const api = {
     return readJson(response);
   },
   async process(rows: Row[], columns: string[], pattern: string, replacement: string) {
-    const response = await fetch("/api/process/", {
+    const response = await fetch(`${API_BASE}/api/process/`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ rows, columns, pattern, replacement })

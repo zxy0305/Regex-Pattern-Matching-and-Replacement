@@ -10,13 +10,13 @@ class RegexProcessingTests(TestCase):
         self.assertIn("@", suggestion.pattern)
         self.assertEqual(suggestion.source, "rules")
 
-    def test_replaces_selected_columns_only(self):
+    def test_replaces_matches_across_all_columns(self):
         rows = [
             {"Name": "John Doe", "Email": "john.doe@example.com"},
             {"Name": "Jane Smith", "Email": "jane@domain.com"},
         ]
 
-        result = process_table(rows, ["Email"], r"\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,7}\b", "REDACTED")
+        result = process_table(rows, r"\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,7}\b", "REDACTED")
 
         self.assertEqual(result["summary"]["totalMatches"], 2)
         self.assertEqual(result["rows"][0]["Name"], "John Doe")

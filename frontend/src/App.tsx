@@ -55,7 +55,6 @@ function App() {
   const [columns, setColumns] = useState<string[]>([]);
   const [rows, setRows] = useState<Row[]>([]);
   const [processedRows, setProcessedRows] = useState<Row[]>([]);
-  const [selectedColumns, setSelectedColumns] = useState<string[]>([]);
   const [description, setDescription] = useState("Example: Find email addresses");
   const [pattern, setPattern] = useState("");
   const [replacement, setReplacement] = useState("REDACTED");
@@ -64,19 +63,19 @@ function App() {
   const [busy, setBusy] = useState("");
 
   const visibleRows = processedRows.length ? processedRows : rows;
-  const canProcess = rows.length > 0 && selectedColumns.length > 0 && pattern.trim().length > 0;
+  const canProcess = rows.length > 0 && pattern.trim().length > 0;
 
   const changedCells = useMemo(() => {
     const keys = new Set<string>();
     processedRows.forEach((row, rowIndex) => {
-      selectedColumns.forEach((column) => {
+      columns.forEach((column) => {
         if ((rows[rowIndex]?.[column] ?? "") !== (row[column] ?? "")) {
           keys.add(`${rowIndex}:${column}`);
         }
       });
     });
     return keys;
-  }, [processedRows, rows, selectedColumns]);
+  }, [columns, processedRows, rows]);
 
   async function handleFile(event: ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0];
@@ -89,7 +88,6 @@ function App() {
       const parsed = await api.parseFile(file);
       setColumns(parsed.columns);
       setRows(parsed.rows);
-      setSelectedColumns(parsed.columns.slice(0, 1));
       setNotice(`Loaded ${parsed.rowCount} rows from ${file.name}.`);
     } catch (error) {
       setNotice(error instanceof Error ? error.message : "Could not parse the file.");
@@ -124,12 +122,6 @@ function App() {
     } finally {
       setBusy("");
     }
-  }
-
-  function toggleColumn(column: string) {
-    setSelectedColumns((current) =>
-      current.includes(column) ? current.filter((item) => item !== column) : [...current, column]
-    );
   }
 
   function downloadCsv() {

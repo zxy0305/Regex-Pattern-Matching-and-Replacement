@@ -104,19 +104,6 @@ def suggest_regex_from_text(description: str) -> RegexSuggestion:
 
     return _suggest_with_rules(text)
 
-
-# def _direct_regex(text: str) -> Optional[str]:
-#     if text.startswith("/") and text.count("/") >= 2:
-#         return text.rsplit("/", 1)[0][1:]
-#     if any(token in text for token in ["\\d", "\\w", "[", "(", "|", "+", "*", "{"]):
-#         try:
-#             re.compile(text)
-#             return text
-#         except re.error:
-#             return None
-#     return None
-
-
 def _suggest_with_openai(description: str) -> Optional[RegexSuggestion]:
     try:
         from openai import OpenAI

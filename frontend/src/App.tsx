@@ -178,7 +178,7 @@ function App() {
           </label>
           <button className="secondary" onClick={handleSuggest} disabled={!description.trim() || busy === "suggest"}>
             {busy === "suggest" ? <Loader2 className="spin" size={17} /> : <Sparkles size={17} />}
-            Suggest Regex
+            Generate Regex
           </button>
 
           <label className="field">

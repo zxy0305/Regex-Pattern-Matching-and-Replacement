@@ -55,7 +55,7 @@ function App() {
   const [columns, setColumns] = useState<string[]>([]);
   const [rows, setRows] = useState<Row[]>([]);
   const [processedRows, setProcessedRows] = useState<Row[]>([]);
-  const [description, setDescription] = useState("Example: Find email addresses");
+  const [description, setDescription] = useState("Find email addresses");
   const [pattern, setPattern] = useState("");
   const [replacement, setReplacement] = useState("REDACTED");
   const [summary, setSummary] = useState<Summary | null>(null);
@@ -145,7 +145,7 @@ function App() {
       <header className="topbar">
         <div>
           <h1>Regex Pattern Matching and Replacement</h1>
-          <p>Upload CSV/XLSX data, convert a plain-language pattern into regex, then replace matches in selected columns.</p>
+          <p>Upload CSV/XLSX data, convert a plain-language pattern into regex, then replace matched values with custom replacement.</p>
         </div>
         <label className="uploadButton">
           {busy === "upload" ? <Loader2 className="spin" size={18} /> : <Upload size={18} />}

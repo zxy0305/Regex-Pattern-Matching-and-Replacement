@@ -25,19 +25,19 @@ const api = {
     const response = await fetch(`${API_BASE}/api/parse-file/`, { method: "POST", body: form });
     return readJson(response);
   },
-  async suggestRegex(description: string, column: string) {
+  async suggestRegex(description: string) {
     const response = await fetch(`${API_BASE}/api/suggest-regex/`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ description, column })
+      body: JSON.stringify({ description})
     });
     return readJson(response);
   },
-  async process(rows: Row[], columns: string[], pattern: string, replacement: string) {
+  async process(rows: Row[], pattern: string, replacement: string) {
     const response = await fetch(`${API_BASE}/api/process/`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ rows, columns, pattern, replacement })
+      body: JSON.stringify({ rows, pattern, replacement })
     });
     return readJson(response);
   }
@@ -56,7 +56,7 @@ function App() {
   const [rows, setRows] = useState<Row[]>([]);
   const [processedRows, setProcessedRows] = useState<Row[]>([]);
   const [selectedColumns, setSelectedColumns] = useState<string[]>([]);
-  const [description, setDescription] = useState("Find email addresses");
+  const [description, setDescription] = useState("Example: Find email addresses");
   const [pattern, setPattern] = useState("");
   const [replacement, setReplacement] = useState("REDACTED");
   const [summary, setSummary] = useState<Summary | null>(null);
@@ -102,7 +102,7 @@ function App() {
     setBusy("suggest");
     setNotice("");
     try {
-      const result = await api.suggestRegex(description, selectedColumns[0] || "");
+      const result = await api.suggestRegex(description);
       setPattern(result.pattern);
       setNotice(`${result.source === "llm" ? "LLM" : "Rule"} suggestion: ${result.explanation}`);
     } catch (error) {
@@ -116,7 +116,7 @@ function App() {
     setBusy("process");
     setNotice("");
     try {
-      const result = await api.process(rows, selectedColumns, pattern, replacement);
+      const result = await api.process(rows, pattern, replacement);
       setProcessedRows(result.rows);
       setSummary(result.summary);
     } catch (error) {
@@ -169,7 +169,6 @@ function App() {
             ) : (
               columns.map((column) => (
                 <label key={column} className="checkRow">
-                  <input checked={selectedColumns.includes(column)} type="checkbox" onChange={() => toggleColumn(column)} />
                   <span>{column}</span>
                 </label>
               ))

@@ -29,10 +29,10 @@ def parse_file(request):
 def suggest_regex(request):
     payload = _json_payload(request)
     description = payload.get("description", "")
-    column = payload.get("column", "")
+    # column = payload.get("column", "")
 
     try:
-        suggestion = suggest_regex_from_text(description, column)
+        suggestion = suggest_regex_from_text(description)
         return JsonResponse(
             {
                 "pattern": suggestion.pattern,
@@ -51,7 +51,6 @@ def process_rows(request):
     try:
         result = process_table(
             rows=payload.get("rows", []),
-            columns=payload.get("columns", []),
             pattern=payload.get("pattern", ""),
             replacement=payload.get("replacement", ""),
         )

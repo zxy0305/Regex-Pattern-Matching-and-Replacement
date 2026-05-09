@@ -29,7 +29,6 @@ def parse_file(request):
 def suggest_regex(request):
     payload = _json_payload(request)
     description = payload.get("description", "")
-    # column = payload.get("column", "")
 
     try:
         suggestion = suggest_regex_from_text(description)

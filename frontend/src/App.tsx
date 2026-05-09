@@ -80,6 +80,11 @@ function App() {
   async function handleFile(event: ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0];
     if (!file) return;
+    if (file.size === 0) {
+      setNotice("The uploaded file is empty. Please upload a non-empty CSV or XLSX file.");
+      event.target.value = "";
+      return;
+    }
     setBusy("upload");
     setNotice("");
     setProcessedRows([]);

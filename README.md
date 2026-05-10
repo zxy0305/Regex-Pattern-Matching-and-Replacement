@@ -81,3 +81,9 @@ Open `http://127.0.0.1:5173`.
 - `POST /api/process/` with JSON `{ "rows": [...], "pattern": "...", "replacement": "..." }`
 
 ## Demo Video
+[Watch Demo](https://drive.google.com/file/d/1YII9XwEvDdoon7jHfVX-ZuERGBW7TG1X/view?usp=drive_link)
+
+## Future Improvement
+- Add support for selecting one or more columns that need to be updated to flexibily match patterns.
+- Integrate database and user authentication to support history tracking ad saved draft.
+- Further explore AI integration by considering AI workflow engineering instead of only performing API calls.

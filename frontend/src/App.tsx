@@ -148,7 +148,7 @@ function App() {
     <main className="app">
       <header className="topbar">
         <div>
-          <h1>Regex Pattern Matching and Replacement</h1>
+          <h1>Regex Processor</h1>
           <p>Upload CSV/XLSX data, convert a plain-language pattern into regex, then replace matched values with custom replacement.</p>
         </div>
         <label className="uploadButton">

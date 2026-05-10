@@ -1,16 +1,16 @@
-# Web Application for Regex Pattern Matching and Replacement
+# Regex Processor
 
-A Django + React application for uploading CSV/XLSX files, describing text patterns in natural language, converting those descriptions into regular expressions, replacing matches in selected columns, and exporting the processed data.
+A Django + React application for uploading CSV/XLSX files, describing text patterns in natural language, converting those descriptions into regex pattern using OpenAI, replacing matches with custom replacement value, and exporting the processed data as CSV.
 
 ## Features
 
 - Upload CSV and XLSX files.
 - Display uploaded data in a table.
-- Select one or more columns for processing.
+- Display columns parsed from files for processing.
 - Convert natural language descriptions to regex patterns.
 - Use OpenAI when `OPENAI_API_KEY` is configured.
 - Fall back to built-in rules for common patterns such as emails, phone numbers, URLs, dates, numbers, and names.
-- Replace matched text and highlight changed cells.
+- Replace matched text with custom replacement value and highlight changed cells.
 - Export processed rows as CSV.
 
 ## Project Structure
@@ -24,27 +24,46 @@ frontend/
   src/
 ```
 
-## Backend Setup
+## Tech Stack
+
+### Frontend
+- React
+- TypeScript
+- Vite
+  
+### Backend
+- Django
+- Python
+
+### AI Integration
+- OpenAI API
+
+### Deployment
+- Vercel
+- Render
+
+## Deployment URL
+
+https://regex-pattern-matching-and-replacem.vercel.app/
+
+## Local Backend Setup
 
 ```bash
 cd backend
-python3 -m venv .venv
-source .venv/bin/activate
 pip install -r requirements.txt
-python manage.py migrate
 python manage.py runserver 127.0.0.1:8000
 ```
 
 Optional LLM configuration:
 
 ```bash
-export OPENAI_API_KEY="your_api_key"
+export OPENAI_API_KEY="api_key"
 export OPENAI_MODEL="gpt-4o-mini"
 ```
 
-Without `OPENAI_API_KEY`, the app still works with direct regex input and built-in rule-based suggestions.
+Without `OPENAI_API_KEY`, the app still works with built-in rule-based regex suggestions.
 
-## Frontend Setup
+## Local Frontend Setup
 
 ```bash
 cd frontend
@@ -58,12 +77,7 @@ Open `http://127.0.0.1:5173`.
 
 - `GET /api/health/`
 - `POST /api/parse-file/` with multipart field `file`
-- `POST /api/suggest-regex/` with JSON `{ "description": "...", "column": "..." }`
-- `POST /api/process/` with JSON `{ "rows": [...], "columns": [...], "pattern": "...", "replacement": "..." }`
+- `POST /api/suggest-regex/` with JSON `{ "description": "..."}`
+- `POST /api/process/` with JSON `{ "rows": [...], "pattern": "...", "replacement": "..." }`
 
-## Tests
-
-```bash
-cd backend
-python manage.py test
-```
+## Demo Video

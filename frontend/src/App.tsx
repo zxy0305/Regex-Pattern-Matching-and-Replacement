@@ -19,6 +19,7 @@ type Summary = {
 };
 
 const api = {
+  // Keep backend request api in one place
   async parseFile(file: File): Promise<ParsedFile> {
     const form = new FormData();
     form.append("file", file);
@@ -65,6 +66,7 @@ function App() {
   const visibleRows = processedRows.length ? processedRows : rows;
   const canProcess = rows.length > 0 && pattern.trim().length > 0;
 
+  // Track changed cells so the table can highlight replacements after processing.
   const changedCells = useMemo(() => {
     const keys = new Set<string>();
     processedRows.forEach((row, rowIndex) => {
@@ -82,6 +84,7 @@ function App() {
     if (!file) return;
     if (file.size === 0) {
       setNotice("The uploaded file is empty. Please upload a non-empty CSV or XLSX file.");
+      // Reset the input 
       event.target.value = "";
       return;
     }
@@ -137,6 +140,7 @@ function App() {
     link.href = url;
     link.download = "processed-data.csv";
     link.click();
+    // Release the temporary object URL after the browser starts the download.
     URL.revokeObjectURL(url);
   }
 
@@ -243,6 +247,7 @@ function App() {
 }
 
 function toCsv(columns: string[], rows: Row[]) {
+  // A function to convert table data to CSV file
   const escape = (value: string) => `"${String(value ?? "").replace(/"/g, '""')}"`;
   return [columns.map(escape).join(","), ...rows.map((row) => columns.map((column) => escape(row[column])).join(","))].join("\n");
 }

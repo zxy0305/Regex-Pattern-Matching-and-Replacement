@@ -9,6 +9,8 @@ from django.conf import settings
 
 
 class FileProcessingError(ValueError):
+    """Raised when an uploaded file cannot be parsed"""
+
     pass
 
 
@@ -20,15 +22,12 @@ class RegexSuggestion:
 
 
 def parse_uploaded_file(uploaded_file) -> dict[str, Any]:
-    '''
-    Parse an uploaded CSV or XLSX file and return structured data.
+    """Parse a CSV or XLSX file into columns, rows, and row count.
 
-    Args: uploaded_file: file object from the request
-
-    Returns: A dictionary containing parsed file
-
-    Raises: FileProcessingError
-    '''
+    Raises:
+        FileProcessingError: If the file is too large or uses an unsupported format.
+        UnicodeDecodeError: If CSV content cannot be decoded as UTF-8.
+    """
 
     if uploaded_file.size > settings.MAX_UPLOAD_BYTES:
         raise FileProcessingError("File is too large.")
@@ -47,6 +46,8 @@ def parse_uploaded_file(uploaded_file) -> dict[str, Any]:
 
 
 def _parse_csv(data: bytes) -> dict[str, Any]:
+    """Parse CSV bytes into a table."""
+
     text = data.decode("utf-8-sig")
     sample = text[:4096]
     try:
@@ -63,6 +64,8 @@ def _parse_csv(data: bytes) -> dict[str, Any]:
 
 
 def _parse_xlsx(data: bytes) -> dict[str, Any]:
+    """Parse XLSX into a table."""
+
     try:
         from openpyxl import load_workbook
     except ImportError as exc:
@@ -87,24 +90,22 @@ def _parse_xlsx(data: bytes) -> dict[str, Any]:
 
 
 def suggest_regex_from_text(description: str) -> RegexSuggestion:
+    """Generate a regex from a natural-language description."""
+
     text = description.strip()
     if not text:
         raise ValueError("Description is required.")
-
-    # direct = _direct_regex(text)
-    # if direct:
-    #     return RegexSuggestion(direct, "Used the provided regular expression.", "direct")
 
     if settings.OPENAI_API_KEY:
         generated = _suggest_with_openai(text)
         if generated:
             return generated
-    else:
-        raise ValueError("LLM connection failed.")
-
+    # Fall back to rule-based regex generation if the LLM call fails.
     return _suggest_with_rules(text)
 
+
 def _suggest_with_openai(description: str) -> Optional[RegexSuggestion]:
+    """Ask OpenAI model for a Python-compatible regex"""
     try:
         from openai import OpenAI
 
@@ -142,14 +143,15 @@ def _suggest_with_openai(description: str) -> Optional[RegexSuggestion]:
 
 
 def _suggest_with_rules(description: str) -> RegexSuggestion:
+    """Return a regex from keyword rules, or an escaped literal fallback."""
     lowered = description.lower()
     rules = [
-        (["email", "e-mail", "邮箱"], r"\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,7}\b", "Matches common email addresses."),
-        (["phone", "telephone", "mobile", "电话", "手机"], r"\b(?:\+?\d{1,3}[-.\s]?)?(?:\(?\d{2,4}\)?[-.\s]?)?\d{3,4}[-.\s]?\d{4}\b", "Matches common phone numbers."),
-        (["url", "link", "website", "网址", "链接"], r"https?://[^\s]+", "Matches HTTP and HTTPS URLs."),
-        (["date", "日期"], r"\b(?:\d{4}[-/]\d{1,2}[-/]\d{1,2}|\d{1,2}[-/]\d{1,2}[-/]\d{2,4})\b", "Matches common numeric dates."),
-        (["number", "numeric", "数字", "金额"], r"\b-?\d+(?:\.\d+)?\b", "Matches integer or decimal numbers."),
-        (["name", "姓名"], r"\b[A-Z][a-z]+(?:\s+[A-Z][a-z]+)+\b", "Matches simple capitalized full names."),
+        (["email", "e-mail"], r"\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,7}\b", "Matches common email addresses."),
+        (["phone", "telephone", "mobile"], r"\b(?:\+?\d{1,3}[-.\s]?)?(?:\(?\d{2,4}\)?[-.\s]?)?\d{3,4}[-.\s]?\d{4}\b", "Matches common phone numbers."),
+        (["url", "link", "website"], r"https?://[^\s]+", "Matches HTTP and HTTPS URLs."),
+        (["date"], r"\b(?:\d{4}[-/]\d{1,2}[-/]\d{1,2}|\d{1,2}[-/]\d{1,2}[-/]\d{2,4})\b", "Matches common numeric dates."),
+        (["number", "numeric"], r"\b-?\d+(?:\.\d+)?\b", "Matches integer or decimal numbers."),
+        (["name"], r"\b[A-Z][a-z]+(?:\s+[A-Z][a-z]+)+\b", "Matches simple capitalized full names."),
     ]
     for keywords, pattern, explanation in rules:
         if any(keyword in lowered for keyword in keywords):
@@ -159,6 +161,7 @@ def _suggest_with_rules(description: str) -> RegexSuggestion:
 
 
 def process_table(rows: list[dict[str, Any]], pattern: str, replacement: str) -> dict[str, Any]:
+    """Replace every regex match in every cell and return processed rows with count"""
     if not rows:
         raise ValueError("Rows are required.")
 
@@ -176,6 +179,7 @@ def process_table(rows: list[dict[str, Any]], pattern: str, replacement: str) ->
         row_changed = False
         for grid in next_row:
             original = "" if next_row.get(grid) is None else str(next_row.get(grid, ""))
+            # Replace regex matches in the original value with the replacement text.
             updated, count = regex.subn(replacement, original)
             if count:
                 total_matches += count
